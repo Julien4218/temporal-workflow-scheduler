@@ -60,7 +60,9 @@ var workerCmd = &cobra.Command{
 				TaskQueue:    QueueName,
 				// ...
 			}
-			workflowRun, err := c.ExecuteWorkflow(context.Background(), workflowOptions, workflows.EventWorkflow)
+
+			input := &workflows.EventWorkflowInput{}
+			workflowRun, err := c.ExecuteWorkflow(context.Background(), workflowOptions, workflows.EventWorkflow, input)
 			if err != nil {
 				logrus.Infof(fmt.Sprintf("Unable to execute workflow detail:%s", err))
 				os.Exit(2)
