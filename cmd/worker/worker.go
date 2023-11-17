@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -11,8 +12,9 @@ import (
 	"github.com/Julien4218/temporal-workflow-scheduler/instrumentation"
 	"github.com/Julien4218/temporal-workflow-scheduler/workflows"
 
-	slackActivities "github.com/Julien4218/temporal-slack-activity/activities"
-	slackInstrumentation "github.com/Julien4218/temporal-slack-activity/instrumentation"
+	newrelicActivities "github.com/Julien4218/temporal-newrelic-activity/activities"
+	newrelicInstrumentation "github.com/Julien4218/temporal-newrelic-activity/instrumentation"
+
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 )
@@ -40,24 +42,47 @@ var workerCmd = &cobra.Command{
 		instrumentation.Init()
 		logrus.Infof("%s-Worker started on queue %s", instrumentation.Hostname, QueueName)
 
-		client, err := client.Dial(client.Options{
+		c, err := client.Dial(client.Options{
 			HostPort:  os.Getenv("TEMPORAL_HOSTPORT"),
 			Namespace: "default",
 		})
 		if err == nil {
-			defer client.Close()
-			workerInstance := worker.New(client, QueueName, worker.Options{})
+			defer c.Close()
+			workerInstance := worker.New(c, QueueName, worker.Options{})
 
-			workerInstance.RegisterWorkflow(workflows.ErWorkflow)
-			workerInstance.RegisterWorkflow(workflows.IncidentWorkflow)
-			workerInstance.RegisterWorkflow(workflows.RetrospectiveWorkflow)
+			workerInstance.RegisterWorkflow(workflows.EventWorkflow)
 
-			slackInstrumentation.AddLogger(func(message string) { logrus.Info(message) })
-			workerInstance.RegisterActivity(slackActivities.PostMessageActivity)
-			workerInstance.RegisterActivity(slackActivities.GetMessageReactions)
-			workerInstance.RegisterActivity(slackActivities.AddReaction)
+			newrelicInstrumentation.AddLogger(func(message string) { logrus.Info(message) })
+			workerInstance.RegisterActivity(newrelicActivities.NewCreateEventActivity)
 
-			err = workerInstance.Run(worker.InterruptCh())
+			workflowOptions := client.StartWorkflowOptions{
+				CronSchedule: "* * * * *",
+				TaskQueue:    QueueName,
+				// ...
+			}
+			workflowRun, err := c.ExecuteWorkflow(context.Background(), workflowOptions, workflows.EventWorkflow)
+			if err != nil {
+				logrus.Infof(fmt.Sprintf("Unable to execute workflow detail:%s", err))
+				os.Exit(2)
+				// ...
+			}
+			logrus.Infof(fmt.Sprintf("Started workflow WorkflowID:%s RunID:%s", workflowRun.GetID(), workflowRun.GetRunID()))
+
+			// var cronScheduleStr string
+			// cronScheduleStr = "* * * * *"
+			// workflowOptions := client.StartWorkflowOptions{
+			// 	ID:           workflowID,
+			// 	TaskQueue:    QueueName,
+			// 	CronSchedule: cronScheduleStr,
+			// }
+
+			// we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, cron.SampleCronWorkflow,sid)
+			// if err != nil {
+			// 	logrus.Infof("Unable to execute workflow", err)
+			// }
+			// logrus.Infof("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
+
+			_ = workerInstance.Run(worker.InterruptCh())
 		}
 
 		if err != nil {

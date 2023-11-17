@@ -1,3 +1,3 @@
 package workflows
 
-const DefaultQueueName = "workflow-er-poc"
+const DefaultQueueName = "temporal-workflow-scheduler"

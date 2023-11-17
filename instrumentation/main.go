@@ -33,7 +33,7 @@ func Init() {
 func instrumentation() (*newrelic.Application, error) {
 	var appName = os.Getenv("NEW_RELIC_APP_NAME")
 	if appName == "" {
-		appName = "workflow-er-poc"
+		appName = "temporal-workflow-scheduler"
 	}
 
 	var licenseKey = os.Getenv("NEW_RELIC_LICENSE_KEY")
