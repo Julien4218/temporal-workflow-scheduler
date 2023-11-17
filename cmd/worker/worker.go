@@ -20,11 +20,13 @@ import (
 )
 
 var (
-	QueueName string
+	QueueName  string
+	WorkflowID string
 )
 
 func init() {
 	workerCmd.Flags().StringVar(&QueueName, "queue", workflows.DefaultQueueName, "Queue")
+	workerCmd.Flags().StringVar(&WorkflowID, "wfid", "", "WorkflowID")
 }
 
 // workerCmd represents the worker command
@@ -56,6 +58,7 @@ var workerCmd = &cobra.Command{
 			workerInstance.RegisterActivity(newrelicActivities.NewCreateEventActivity)
 
 			workflowOptions := client.StartWorkflowOptions{
+				ID:           WorkflowID,
 				CronSchedule: "* * * * *",
 				TaskQueue:    QueueName,
 				// ...
