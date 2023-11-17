@@ -57,21 +57,23 @@ var workerCmd = &cobra.Command{
 			newrelicInstrumentation.AddLogger(func(message string) { logrus.Info(message) })
 			workerInstance.RegisterActivity(newrelicActivities.NewCreateEventActivity)
 
-			workflowOptions := client.StartWorkflowOptions{
-				ID:           WorkflowID,
-				CronSchedule: "* * * * *",
-				TaskQueue:    QueueName,
-				// ...
-			}
+			if WorkflowID != "" {
+				workflowOptions := client.StartWorkflowOptions{
+					ID:           WorkflowID,
+					CronSchedule: "* * * * *",
+					TaskQueue:    QueueName,
+					// ...
+				}
 
-			input := &workflows.EventWorkflowInput{}
-			workflowRun, err := c.ExecuteWorkflow(context.Background(), workflowOptions, workflows.EventWorkflow, input)
-			if err != nil {
-				logrus.Infof(fmt.Sprintf("Unable to execute workflow detail:%s", err))
-				os.Exit(2)
-				// ...
+				input := &workflows.EventWorkflowInput{}
+				workflowRun, err := c.ExecuteWorkflow(context.Background(), workflowOptions, workflows.EventWorkflow, input)
+				if err != nil {
+					logrus.Infof(fmt.Sprintf("Unable to execute workflow detail:%s", err))
+					os.Exit(2)
+					// ...
+				}
+				logrus.Infof(fmt.Sprintf("Started workflow WorkflowID:%s RunID:%s", workflowRun.GetID(), workflowRun.GetRunID()))
 			}
-			logrus.Infof(fmt.Sprintf("Started workflow WorkflowID:%s RunID:%s", workflowRun.GetID(), workflowRun.GetRunID()))
 
 			// var cronScheduleStr string
 			// cronScheduleStr = "* * * * *"
