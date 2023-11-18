@@ -5,15 +5,20 @@ module github.com/Julien4218/temporal-workflow-scheduler
 go 1.19
 
 require (
+	github.com/Julien4218/temporal-newrelic-activity v0.5.1
 	github.com/golang/protobuf v1.5.3
+	github.com/joho/godotenv v1.5.1
 	github.com/newrelic/go-agent/v3 v3.28.0
 	github.com/newrelic/go-agent/v3/integrations/logcontext-v2/nrlogrus v1.0.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/cobra v1.8.0
+	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.8.4
 	go.temporal.io/sdk v1.25.1
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
-	github.com/Julien4218/temporal-newrelic-activity v0.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
@@ -30,15 +35,11 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/gojq v0.12.13 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/newrelic/newrelic-client-go/v2 v2.22.2 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
-	github.com/spf13/cobra v1.8.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/valyala/fastjson v1.6.3 // indirect
 	go.temporal.io/api v1.24.0 // indirect
@@ -51,6 +52,5 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20230815205213-6bfd019c3878 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230815205213-6bfd019c3878 // indirect
 	google.golang.org/grpc v1.57.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
