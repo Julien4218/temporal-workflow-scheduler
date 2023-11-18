@@ -27,7 +27,7 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) error {
 	workflowStartTimestamp := timestamppb.Now()
 	workflowStarttime := workflowStartTimestamp.AsTime()
 	nowAsMinute := time.Now().Truncate(time.Second).Truncate(time.Millisecond).Truncate(time.Microsecond).Truncate(time.Nanosecond)
-	timeInterval := nowAsMinute.Sub(workflowStarttime)
+	timeIntervalMs := workflowStarttime.Sub(nowAsMinute).Milliseconds()
 
 	ctx = updateWorkflowContextOptions(ctx)
 	logrus.Infof("%s-EventWorkflow started", instrumentation.Hostname)
@@ -44,7 +44,7 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) error {
 	}
 	eventInput := &newrelicActivities.CreateEventInput{
 		AccountID:     accountID,
-		EventDataJson: fmt.Sprintf("{\"eventType\":\"temporalWorkflowScheduler\", \"timestamp\":\"%s\", \"timeIntervalMs\":\"%s\"}", workflowStarttime.Unix(), timeInterval.Milliseconds()),
+		EventDataJson: fmt.Sprintf("{\"eventType\":\"temporalWorkflowScheduler\", \"timestamp\":\"%d\", \"timeIntervalMs\":\"%d\"}", workflowStarttime.Unix(), timeIntervalMs),
 	}
 
 	var result interface{}
@@ -53,7 +53,7 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) error {
 		return err
 	}
 
-	logrus.Infof("time difference is %s", timeInterval)
+	logrus.Infof("time difference is %s", timeIntervalMs)
 
 	return nil
 }

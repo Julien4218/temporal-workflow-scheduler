@@ -22,11 +22,13 @@ import (
 var (
 	QueueName  string
 	WorkflowID string
+	Exit       bool
 )
 
 func init() {
 	workerCmd.Flags().StringVar(&QueueName, "queue", workflows.DefaultQueueName, "Queue")
 	workerCmd.Flags().StringVar(&WorkflowID, "wfid", "", "WorkflowID")
+	workerCmd.Flags().BoolVar(&Exit, "exit", false, "false")
 }
 
 // workerCmd represents the worker command
@@ -89,7 +91,9 @@ var workerCmd = &cobra.Command{
 			// }
 			// logrus.Infof("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
 
-			_ = workerInstance.Run(worker.InterruptCh())
+			if Exit == false {
+				_ = workerInstance.Run(worker.InterruptCh())
+			}
 		}
 
 		if err != nil {

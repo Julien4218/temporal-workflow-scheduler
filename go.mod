@@ -1,5 +1,7 @@
 module github.com/Julien4218/temporal-workflow-scheduler
 
+// replace github.com/Julien4218/temporal-newrelic-activity => /Users/<username>/temporal-newrelic-activity
+
 go 1.19
 
 require (
@@ -11,7 +13,7 @@ require (
 )
 
 require (
-	github.com/Julien4218/temporal-newrelic-activity v0.5.0 // indirect
+	github.com/Julien4218/temporal-newrelic-activity v0.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
