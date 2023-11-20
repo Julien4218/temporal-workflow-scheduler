@@ -49,7 +49,7 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) (string, err
 	}
 	eventInput := &newrelicActivities.CreateEventInput{
 		AccountID:     accountID,
-		EventDataJson: fmt.Sprintf("{\"eventType\":\"temporalWorkflowScheduler\", \"timestamp\":\"%d\", \"timeIntervalMs\":\"%d\"}", workflowStarttime.Unix(), timeIntervalMs),
+		EventDataJson: fmt.Sprintf("{\"eventType\":\"temporalWorkflowScheduler\", \"timestamp\":%d, \"timeIntervalMs\":%d}", workflowStarttime.Unix(), timeIntervalMs),
 	}
 
 	var result interface{}
