@@ -23,11 +23,16 @@ type EventWorkflowInput struct {
 	TimestampStart timestamp.Timestamp
 }
 
-func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) error {
-	workflowStartTimestamp := timestamppb.Now()
-	workflowStarttime := workflowStartTimestamp.AsTime()
-	nowAsMinute := time.Now().Truncate(time.Second).Truncate(time.Millisecond).Truncate(time.Microsecond).Truncate(time.Nanosecond)
-	timeIntervalMs := workflowStarttime.Sub(nowAsMinute).Milliseconds()
+func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) (string, error) {
+	workflowStarttime := timestamppb.Now().AsTime()
+	nowAsMinute := timestamppb.New(time.Date(
+		workflowStarttime.Year(),
+		workflowStarttime.Month(),
+		workflowStarttime.Day(),
+		workflowStarttime.Hour(),
+		workflowStarttime.Minute(),
+		0, 0, time.UTC))
+	timeIntervalMs := workflowStarttime.Sub(nowAsMinute.AsTime()).Milliseconds()
 
 	ctx = updateWorkflowContextOptions(ctx)
 	logrus.Infof("%s-EventWorkflow started", instrumentation.Hostname)
@@ -40,7 +45,7 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) error {
 	accountID, err := strconv.Atoi(os.Getenv("NEW_RELIC_ACCOUNT_ID"))
 	if err != nil {
 		logrus.Errorf(fmt.Sprintf("error could not find environment variable NEW_RELIC_ACCOUNT_ID"))
-		return err
+		return "", err
 	}
 	eventInput := &newrelicActivities.CreateEventInput{
 		AccountID:     accountID,
@@ -50,19 +55,18 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) error {
 	var result interface{}
 	if err := workflow.ExecuteActivity(ctx, newrelicActivities.NewCreateEventActivity, eventInput).Get(ctx, &result); err != nil {
 		logrus.Errorf("Activity NewCreateEventActivity failed. Error: %s", err)
-		return err
+		return "", err
 	}
 
-	logrus.Infof("time difference is %s", timeIntervalMs)
+	message := fmt.Sprintf("time difference is %d", timeIntervalMs)
+	logrus.Infof(message)
 
-	return nil
+	return message, nil
 }
 
 func updateWorkflowContextOptions(ctx workflow.Context) workflow.Context {
-	// Define the SlackMessageActivity Execution options
-	// StartToCloseTimeout or ScheduleToCloseTimeout must be set
 	activityOptions := workflow.ActivityOptions{
-		StartToCloseTimeout: 10 * time.Second,
+		StartToCloseTimeout: 5 * time.Second,
 	}
 	ctx = workflow.WithActivityOptions(ctx, activityOptions)
 	return ctx
