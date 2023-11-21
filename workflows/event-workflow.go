@@ -61,7 +61,30 @@ func EventWorkflow(ctx workflow.Context, input *EventWorkflowInput) (string, err
 	message := fmt.Sprintf("time difference is %d", timeIntervalMs)
 	logrus.Infof(message)
 
+	info := workflow.GetInfo(ctx)
+	runID := info.WorkflowExecution.RunID
+	output := fmt.Sprintf("%s,%s,%d,%d", runID, workflowStarttime, workflowStarttime.Unix(), timeIntervalMs)
+	directory := fmt.Sprintf("%d/%d/%d/%d/%d",
+		workflowStarttime.Year(), workflowStarttime.Month(), workflowStarttime.Day(),
+		workflowStarttime.Hour(), workflowStarttime.Minute())
+	appendFile(directory, "output.log", output)
 	return message, nil
+}
+
+func appendFile(directory string, filename string, message string) {
+	os.MkdirAll(directory, 0700)
+	filepath := fmt.Sprintf("%s/%s", directory, filename)
+	f, err := os.OpenFile(filepath,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		errorMessage := fmt.Sprintf("error while opening file:%s", err.Error())
+		logrus.Infof(errorMessage)
+	}
+	defer f.Close()
+	if _, err := f.WriteString(fmt.Sprintln(message)); err != nil {
+		errorMessage := fmt.Sprintf("error while appending to file:%s", err.Error())
+		logrus.Infof(errorMessage)
+	}
 }
 
 func updateWorkflowContextOptions(ctx workflow.Context) workflow.Context {
